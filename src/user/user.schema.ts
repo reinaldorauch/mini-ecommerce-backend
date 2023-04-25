@@ -18,29 +18,22 @@ export class User {
   @Prop({ required: true, index: 'hashed', unique: true })
   email: string;
 
-  @Prop({
-    required: true,
-    set: hashPassword,
-    get: protectedProp('passwordHash'),
-  })
+  @Prop({ required: true })
   passwordHash: string;
 
   @Prop({ default: UserRole.Customer, enum: UserRole })
   role: UserRole;
-
-  checkPassword(plain: string): Promise<boolean> {
-    return argon2.verify(this.passwordHash, plain);
-  }
 }
 
-function hashPassword(plain: string) {
-  argon2.hash(plain, { salt: randomBytes(32) });
+export function checkPassword(
+  passwordHash: string,
+  plain: string,
+): Promise<boolean> {
+  return argon2.verify(passwordHash, plain);
 }
 
-function protectedProp(prop: string) {
-  return () => {
-    throw new Error('getting ' + prop + ' hash not permitted');
-  };
+export function hashPassword(plain: string): Promise<string> {
+  return argon2.hash(plain, { salt: randomBytes(32) });
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
