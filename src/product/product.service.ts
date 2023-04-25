@@ -1,13 +1,10 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Product } from './product.schema';
 import { ProductDto } from './dto/product.dto';
+import { ProductListParamsDto } from './dto/product-list-params.dto';
+import { PaginatedResult } from '../util/paginated-result';
 
 @Injectable()
 export class ProductService {
@@ -15,8 +12,23 @@ export class ProductService {
     @InjectModel(Product.name) private readonly model: Model<Product>,
   ) {}
 
-  list(): Promise<Product[]> {
-    return this.model.find().exec();
+  async list({
+    skip = 0,
+    take = 10,
+    search = null,
+  }: ProductListParamsDto): Promise<PaginatedResult<Product>> {
+    const searchOpt = search
+      ? {
+          $text: {
+            $search: search,
+          },
+        }
+      : {};
+
+    return {
+      total: await this.model.countDocuments(searchOpt),
+      data: await this.model.find(searchOpt).limit(take).skip(skip).exec(),
+    };
   }
 
   async create(dto: ProductDto): Promise<void> {

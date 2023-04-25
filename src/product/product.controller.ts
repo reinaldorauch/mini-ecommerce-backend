@@ -1,14 +1,15 @@
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductDto } from './dto/product.dto';
+import { ProductListParamsDto } from './dto/product-list-params.dto';
 
 @Controller('product')
 export class ProductController {
   constructor(private readonly svc: ProductService) {}
 
   @Get()
-  list() {
-    return this.svc.list();
+  list(@Query() query: ProductListParamsDto) {
+    return this.svc.list(query);
   }
 
   @Post()
