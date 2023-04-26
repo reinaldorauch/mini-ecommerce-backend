@@ -11,14 +11,17 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { CartService } from './cart.service';
-import { Cookies } from 'src/util/cookies.decorator';
+import { Cookies } from '../util/cookies.decorator';
 import { CartProductDto } from './dto/cart-product.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('cart')
 export class CartController {
-  constructor(private readonly svc: CartService) {}
+  constructor(
+    private readonly svc: CartService,
+    private readonly cfg: ConfigService,
+  ) {}
 
-  @HttpCode(HttpStatus.OK)
   @Post()
   async add(
     @Body() dto: CartProductDto,
@@ -27,7 +30,13 @@ export class CartController {
   ) {
     const newId = await this.svc.add(dto, id);
     if (!id) {
+      if (this.cfg.get<string>('NODE_ENV', 'production') === 'testing') {
+        res.setHeader('x-cart-id', newId);
+      }
       res.cookie('cart_id', newId);
+      res.status(HttpStatus.CREATED);
+    } else {
+      res.status(HttpStatus.OK);
     }
   }
 
@@ -40,6 +49,8 @@ export class CartController {
   @Delete()
   async delete(@Cookies('cart_id') id?: string) {
     if (!id) throw new NotFoundException();
-    await this.svc.delete(id);
+    if (!(await this.svc.delete(id))) {
+      throw new NotFoundException();
+    }
   }
 }

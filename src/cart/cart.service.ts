@@ -1,5 +1,5 @@
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Redis } from 'ioredis';
 import { CartProductDto } from './dto/cart-product.dto';
@@ -14,23 +14,27 @@ export class CartService {
     if (!id) {
       id = randomUUID();
     }
-    if (dto.quantity) {
-      await this.redis.hincrby(CART_KEY_NAMESPACE + id, dto.id, dto.quantity);
-    } else {
-      await this.redis.hdel(CART_KEY_NAMESPACE + id, dto.id);
+    const key = CART_KEY_NAMESPACE + id;
+    const result = await this.redis.hincrby(key, dto.id, dto.quantity);
+    if (result <= 0) {
+      await this.redis.hdel(key, dto.id);
     }
     return id;
   }
 
   async list(id: string) {
-    const list = await this.redis.hgetall(CART_KEY_NAMESPACE + id);
+    const key = CART_KEY_NAMESPACE + id;
+    if (!(await this.redis.exists(key))) {
+      throw new NotFoundException();
+    }
+    const list = await this.redis.hgetall(key);
     return Object.entries(list).map(([key, val]) => ({
       id: key,
       quantity: Number(val),
     }));
   }
 
-  async delete(id: string) {
-    await this.redis.del(CART_KEY_NAMESPACE + id);
+  delete(id: string) {
+    return this.redis.del(CART_KEY_NAMESPACE + id);
   }
 }
