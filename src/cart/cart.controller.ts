@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
-  Patch,
   Post,
   Res,
 } from '@nestjs/common';
@@ -20,7 +19,7 @@ export class CartController {
   constructor(private readonly svc: CartService) {}
 
   @HttpCode(HttpStatus.OK)
-  @Patch()
+  @Post()
   async add(
     @Body() dto: CartProductDto,
     @Res({ passthrough: true }) res: Response,

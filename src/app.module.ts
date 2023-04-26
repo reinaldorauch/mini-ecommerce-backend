@@ -29,23 +29,19 @@ import { RedisModule } from '@liaoliaots/nestjs-redis';
       inject: [ConfigService],
       useFactory: async (cfg: ConfigService) => {
         return {
-          uri: cfg.get<string>(
-            'DATABASE_URL',
-            'mongodb://localhost:27017/mini-ecommerce',
-          ),
+          uri: cfg.get<string>('DATABASE_URL', 'mongodb://localhost:27017'),
         };
       },
     }),
     RedisModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: async (cfg: ConfigService) => ({
-        config: {
-          url: cfg.get<string>(
-            'REDIS_URL',
-            'redis://localhost:6379/mini-ecommerce',
-          ),
-        },
-      }),
+      useFactory: async (cfg: ConfigService) => {
+        return {
+          config: {
+            url: cfg.get<string>('REDIS_URL', 'redis://localhost:6379'),
+          },
+        };
+      },
     }),
     AuthModule,
     UserModule,
