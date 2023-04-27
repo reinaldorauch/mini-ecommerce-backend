@@ -16,7 +16,7 @@ export class ProductService {
     skip = 0,
     take = 10,
     search = null,
-  }: ProductListParamsDto): Promise<PaginatedResult<Product>> {
+  }: ProductListParamsDto = {}): Promise<PaginatedResult<Product>> {
     const searchOpt = search
       ? {
           $text: {
@@ -45,5 +45,14 @@ export class ProductService {
   update(id: string, dto: ProductDto): Promise<Product> {
     if (!Types.ObjectId.isValid(id)) throw new NotFoundException();
     return this.model.findByIdAndUpdate(id, dto, { returnOriginal: false });
+  }
+
+  async delete(id: string) {
+    if (!Types.ObjectId.isValid(id)) throw new NotFoundException();
+    await this.model.findByIdAndDelete(id);
+  }
+
+  async deleteAll() {
+    await this.model.deleteMany();
   }
 }

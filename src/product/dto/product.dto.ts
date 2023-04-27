@@ -1,11 +1,4 @@
-import {
-  IsArray,
-  IsNumber,
-  IsNumberString,
-  IsString,
-  IsUrl,
-  ValidateNested,
-} from 'class-validator';
+import { IsNumber, IsNumberString, IsString, IsUrl } from 'class-validator';
 
 export class ProductDto {
   @IsString()
