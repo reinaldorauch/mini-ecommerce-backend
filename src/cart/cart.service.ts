@@ -10,7 +10,7 @@ const CART_KEY_NAMESPACE = 'cart:';
 export class CartService {
   constructor(@InjectRedis() private readonly redis: Redis) {}
 
-  async add(dto: CartProductDto, id?: string) {
+  async add(dto: Omit<CartProductDto, 'cartId'>, id?: string) {
     if (!id) {
       id = randomUUID();
     }

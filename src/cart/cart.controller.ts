@@ -3,52 +3,41 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
   HttpStatus,
   NotFoundException,
+  Param,
   Post,
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { CartService } from './cart.service';
-import { Cookies } from '../util/cookies.decorator';
 import { CartProductDto } from './dto/cart-product.dto';
-import { ConfigService } from '@nestjs/config';
 
 @Controller('cart')
 export class CartController {
-  constructor(
-    private readonly svc: CartService,
-    private readonly cfg: ConfigService,
-  ) {}
+  constructor(private readonly svc: CartService) {}
 
   @Post()
   async add(
-    @Body() dto: CartProductDto,
+    @Body() { cartId: id, ...dto }: CartProductDto,
     @Res({ passthrough: true }) res: Response,
-    @Cookies('cart_id') id?: string,
   ) {
     const newId = await this.svc.add(dto, id);
     if (!id) {
-      if (this.cfg.get<string>('NODE_ENV', 'production') === 'testing') {
-        res.setHeader('x-cart-id', newId);
-      }
-      res.cookie('cart_id', newId);
       res.status(HttpStatus.CREATED);
+      res.json({ cartId: newId });
     } else {
       res.status(HttpStatus.OK);
     }
   }
 
-  @Get()
-  list(@Cookies('cart_id') id?: string) {
-    if (!id) throw new NotFoundException();
+  @Get(':cartId')
+  list(@Param('cartId') id: string) {
     return this.svc.list(id);
   }
 
-  @Delete()
-  async delete(@Cookies('cart_id') id?: string) {
-    if (!id) throw new NotFoundException();
+  @Delete(':cartId')
+  async delete(@Param('cartId') id: string) {
     if (!(await this.svc.delete(id))) {
       throw new NotFoundException();
     }
