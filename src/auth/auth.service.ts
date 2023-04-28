@@ -2,12 +2,15 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { checkPassword } from '../user/user.schema';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
+  private secret = this.cfg.get<string>('SERVER_SECRET');
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
+    private readonly cfg: ConfigService,
   ) {}
 
   async signIn(email: string, password: string) {
@@ -23,7 +26,9 @@ export class AuthService {
     };
 
     return {
-      accessToken: await this.jwtService.signAsync(payload),
+      accessToken: await this.jwtService.signAsync(payload, {
+        secret: this.secret,
+      }),
     };
   }
 }
