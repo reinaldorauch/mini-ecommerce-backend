@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { CartModule } from './cart/cart.module';
 import { RedisModule } from '@liaoliaots/nestjs-redis';
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { RedisModule } from '@liaoliaots/nestjs-redis';
     UserModule,
     ProductModule,
     CartModule,
+    ImageModule,
   ],
 })
 export class AppModule {}
