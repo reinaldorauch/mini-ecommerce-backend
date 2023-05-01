@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class AuthService {
   private secret = this.cfg.get<string>('SERVER_SECRET');
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
@@ -27,6 +28,7 @@ export class AuthService {
 
     return {
       accessToken: await this.jwtService.signAsync(payload, {
+        expiresIn: '1d',
         secret: this.secret,
       }),
     };
