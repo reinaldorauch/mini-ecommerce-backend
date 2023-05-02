@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ImageController } from './image.controller';
 import { ImageService } from './image.service';
 import { AwsSdkModule } from 'aws-sdk-v3-nest';

@@ -9,6 +9,7 @@ import { UserModule } from './user/user.module';
 import { CartModule } from './cart/cart.module';
 import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { ImageModule } from './image/image.module';
+import { HealthcheckModule } from './healthcheck/healthcheck.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { ImageModule } from './image/image.module';
     ProductModule,
     CartModule,
     ImageModule,
+    HealthcheckModule,
   ],
 })
 export class AppModule {}
