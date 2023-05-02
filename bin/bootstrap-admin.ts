@@ -18,6 +18,8 @@ async function bootstrap() {
     role: UserRole.Admin,
   });
 
-  app.get(Logger).log('Done adding user.');
+  const logger = new Logger('bootstrap-admin');
+
+  logger.log('Done adding user.');
 }
 bootstrap();
