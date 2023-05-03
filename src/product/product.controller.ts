@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -24,9 +25,9 @@ export class ProductController {
   }
 
   @UseGuards(TokenGuard, IsAdminGuard)
-  @Post()
-  async create(@Body() dto: ProductDto) {
-    await this.svc.create(dto);
+  @Get('summary')
+  summary() {
+    return this.svc.summary();
   }
 
   @Get(':id')
@@ -35,8 +36,20 @@ export class ProductController {
   }
 
   @UseGuards(TokenGuard, IsAdminGuard)
+  @Post()
+  async create(@Body() dto: ProductDto) {
+    await this.svc.create(dto);
+  }
+
+  @UseGuards(TokenGuard, IsAdminGuard)
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: ProductDto) {
     return this.svc.update(id, dto);
+  }
+
+  @UseGuards(TokenGuard, IsAdminGuard)
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    await this.svc.delete(id);
   }
 }

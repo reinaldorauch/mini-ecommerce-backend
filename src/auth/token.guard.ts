@@ -26,7 +26,9 @@ export class TokenGuard implements CanActivate {
       this.logger.debug('Checking access for route ' + request.path);
     }
 
-    const token = this.extractTokenFromHeader(request);
+    const token =
+      this.extractTokenFromHeader(request) ??
+      this.extractTokenFromQuery(request);
 
     if (!token) {
       if (!this.isProd) {
@@ -60,5 +62,10 @@ export class TokenGuard implements CanActivate {
   private extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
+  }
+
+  private extractTokenFromQuery(request: Request): string | undefined {
+    if (typeof request.query?.token !== 'string') return undefined;
+    return request.query?.token ?? undefined;
   }
 }

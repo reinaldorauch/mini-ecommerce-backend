@@ -5,6 +5,7 @@ import { Product } from './product.schema';
 import { ProductDto } from './dto/product.dto';
 import { ProductListParamsDto } from './dto/product-list-params.dto';
 import { PaginatedResult } from '../util/paginated-result';
+import { IndexSummary } from './dto/index-summary.dto';
 
 @Injectable()
 export class ProductService {
@@ -45,6 +46,54 @@ export class ProductService {
   update(id: string, dto: ProductDto): Promise<Product> {
     if (!Types.ObjectId.isValid(id)) throw new NotFoundException();
     return this.model.findByIdAndUpdate(id, dto, { returnOriginal: false });
+  }
+
+  async summary(): Promise<IndexSummary> {
+    const [
+      productCount,
+      itemSum,
+      avgItem,
+      lowestStockProduct,
+      highestStockProduct,
+    ] = await Promise.all([
+      this.model.count(),
+      this.model.aggregate([
+        {
+          $group: { _id: 'itemSum', itemSum: { $sum: '$itemsInStock' } },
+        },
+      ]),
+      this.model.aggregate([
+        {
+          $group: { _id: 'avgItem', avgItem: { $avg: '$itemsInStock' } },
+        },
+      ]),
+      this.model.aggregate([
+        { $sort: { itemsInStock: 1 } },
+        {
+          $group: {
+            _id: 'prod',
+            title: { $first: '$title' },
+          },
+        },
+      ]),
+      this.model.aggregate([
+        { $sort: { itemsInStock: -1 } },
+        {
+          $group: {
+            _id: 'prod',
+            title: { $first: '$title' },
+          },
+        },
+      ]),
+    ]);
+
+    return {
+      productCount,
+      itemSum: itemSum[0].itemSum,
+      avgItemsInStock: avgItem[0].avgItem,
+      highestStockProduct: highestStockProduct[0].title,
+      lowestStockProduct: lowestStockProduct[0].title,
+    };
   }
 
   async delete(id: string) {
