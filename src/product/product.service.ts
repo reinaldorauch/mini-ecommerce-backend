@@ -43,6 +43,11 @@ export class ProductService {
     return product;
   }
 
+  async mapProds(ids: string[]): Promise<Product[]> {
+    const prods = await Promise.all(ids.map((id) => this.model.findById(id)));
+    return ids.map((_, index) => prods[index]);
+  }
+
   update(id: string, dto: ProductDto): Promise<Product> {
     if (!Types.ObjectId.isValid(id)) throw new NotFoundException();
     return this.model.findByIdAndUpdate(id, dto, { returnOriginal: false });
